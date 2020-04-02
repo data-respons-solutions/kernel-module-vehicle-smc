@@ -36,13 +36,14 @@
 #include <linux/of_irq.h>
 #include <linux/interrupt.h>
 #include <linux/gpio.h>
+#include <linux/gpio/machine.h>
 #include <linux/gpio/consumer.h>
 #include <linux/bcd.h>
 #include <linux/rtc.h>
 #include <linux/sched/signal.h>
 #include <linux/power_supply.h>
 
-#include "mcu_proto.h"
+#include "smc_proto.h"
 
 #define VEC6200_SMC_LED_MAX_NAME_LEN	30
 #define MAX_GPIOS 6
@@ -1397,8 +1398,9 @@ static int smc_setup_gpio(struct smc_data *priv)
 	}
 
 	for (n = 0; n < priv->gpio_ctl.ngpio; n++) {
+		/* gpiochip_request_own_desc now requires gpio_lookup_flags and gpiod_flags */
 		priv->gpio_descs[n] = gpiochip_request_own_desc(&priv->gpio_ctl,
-			n, gpio_names[n]);
+			n, gpio_names[n], GPIO_LOOKUP_FLAGS_DEFAULT, GPIOD_ASIS);
 		if (IS_ERR(priv->gpio_descs[n])) {
 			dev_err(&priv->client->dev,
 				"%s: Failed to request own desc (%ld)\n",
