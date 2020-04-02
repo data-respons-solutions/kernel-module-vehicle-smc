@@ -43,6 +43,8 @@
 #include <linux/sched/signal.h>
 #include <linux/power_supply.h>
 
+// FIXME: uevents(?) for ignition/wakeup/powerfail
+
 #include "smc_proto.h"
 
 #define VEC6200_SMC_LED_MAX_NAME_LEN	30
@@ -66,7 +68,7 @@ struct smc_data {
 	struct gpio_chip gpio_ctl;
 	struct gpio_desc *gpio_descs[MAX_GPIOS];
 	u8 gpio_is_input[MAX_GPIOS];
-	struct device *gpio_dev[MAX_GPIOS];
+	//struct device *gpio_dev[MAX_GPIOS];
 
 	wait_queue_head_t readq; /* used by write to wake blk.read */
 	MpuVersionHeader_t version;
@@ -755,19 +757,25 @@ static void smc_alert_handler(struct work_struct *work)
 			notify.id, notify.value);
 		switch (notify.id) {
 		case GpiIgnition:
+			dev_err(&priv->client->dev, "%s: Ignored notification\n", __func__);
+			/*
 			if (priv->gpio_dev[2]
 				&& (gpiod_get_direction(priv->gpio_descs[2]) > 0)) {
 				kobject_uevent(&priv->gpio_dev[2]->kobj,
 					KOBJ_CHANGE);
 			}
+			*/
 			break;
 
 		case GpiWakeup:
+			dev_err(&priv->client->dev, "%s: Ignored notification\n", __func__);
+			/*
 			if (priv->gpio_dev[3]
 				&& (gpiod_get_direction(priv->gpio_descs[3]) > 0)) {
 				kobject_uevent(&priv->gpio_dev[3]->kobj,
 					KOBJ_CHANGE);
 			}
+			*/
 			break;
 
 		case PowerFail:
@@ -1408,7 +1416,7 @@ static int smc_setup_gpio(struct smc_data *priv)
 			return PTR_ERR(priv->gpio_descs[n]);
 		}
 		gpiod_export(priv->gpio_descs[n], true);
-		priv->gpio_dev[n] = gpiod_to_dev(priv->gpio_descs[n]);
+		//priv->gpio_dev[n] = gpiod_to_dev(priv->gpio_descs[n]);
 		dev_info(&priv->client->dev, "Add GPIO %s from DT\n",
 			gpio_names[n]);
 		if (priv->gpio_is_input[n])
