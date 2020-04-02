@@ -1,4 +1,4 @@
-smc-y := smc_proto.o smc_main.o
+smc-y := smc_proto.o smc_main.o smc_transaction.o
 obj-m := smc.o
 
 SRC := $(shell pwd)
